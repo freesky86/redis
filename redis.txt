@@ -1,0 +1,73 @@
+https://www.runoob.com/redis/redis-install.html
+
+D:\Software\Redis-x64-5.0.9
+1.启动server
+打开一个 cmd 窗口
+>>redis-server.exe redis.windows.conf
+2.启动client
+再打开一个 cmd 窗口
+连接redis server
+>>redis-cli.exe -h 127.0.0.1 -p 6379
+设置键值对:
+>>set myKey abc
+取出键值对:
+>>get myKey
+3.查看dump.rdb （rdb: redis database）
+Redis 会定期将内存中的数据保存到一个二进制文件中，默认文件名为 dump.rdb
+Redis 提供了一个名为 redis-check-rdb 的工具，可以用于检查 RDB 文件的完整性，并输出一些基本信息。
+
+打开一个 cmd 窗口
+>>redis-check-rdb dump.rdb
+
+或者打开redis 客户端，通过 "keys *" 命令查看
+>>keys *
+
+------------------------------------------------------------------------------
+Spring Boot
+1.pom.xml
+		<!-- Redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+		</dependency>
+
+2.application.properties
+# Redis 配置
+spring.redis.host=127.0.0.1
+spring.redis.port=6379
+
+上面这个配置是默认值，如果不配，也能正常使用。
+因为spring-boot-starter-data-redis依赖的自动配置类（RedisAutoConfiguration）实现了以下默认行为
+    主机地址：未显式配置时，spring.redis.host的默认值为localhost。
+    端口号：未显式配置时，spring.redis.port的默认值为6379。
+    其他配置（如密码、数据库索引等）如果没有显式指定，则保持为空或默认值
+可以查看RedisAutoConfiguration的源码，类上面有个注解@EnableConfigurationProperties({RedisProperties.class})
+打开RedisProperties类就能看到属性值设置了默认值。
+    private String host = "localhost";
+    private int port = 6379;
+
+3.coding
+3.1 自定义RedisTemplate
+
+@Configuration
+public class RedisConfig {
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        // 设置 key 和 value 的序列化器
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        return template;
+    }
+}
+
+3.2 使用Spring Data Redis 自动配置的 StringRedisTemplate
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
