@@ -6,6 +6,8 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 
 @Service
 public class RedisSetExample {
@@ -26,5 +28,13 @@ public class RedisSetExample {
 
     public boolean isMember(String key, String value) {
         return setOps.isMember(key, value);
+    }
+
+    public Set<String> getAllMembers(String key) {
+        return setOps.members(key);
+    }
+
+    public String randomMember(String key) {
+        return setOps.randomMember(key);
     }
 }
